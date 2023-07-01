@@ -10,7 +10,7 @@
 #*****************************************************************************
 
 #------------------------------------------------------------------------------
-# <Put a Description Here>
+# <a makefile that is designed to operate on a host platform or the msp432 platform>
 #
 # Use: make [TARGET] [PLATFORM-OVERRIDES]
 #
@@ -24,18 +24,62 @@
 include sources.mk
 
 # Platform Overrides
-PLATFORM = 
+PLATFORM ?= 
 
 # Architectures Specific Flags
-LINKER_FILE = 
-CPU = 
-ARCH = 
-SPECS = 
+LINKER_FILE =msp432p401r.lds 
+CPU = cortex-m4
+ARCV=armv7e-m
+ARCH = thumb
+FLOAT= hard
+FPU=fpv4-sp-d16
+SPECS = nosys.specs
+#Compiler flags and Defines
 
-# Compiler Flags and Defines
 CC = 
 LD = 
-LDFLAGS = 
-CFLAGS = 
-CPPFLAGs = 
+LDFLAGS = -Wl,-Map=$(TARGET).map
+CFLAGS = -Wall -Werror -g -Oo -std=c99
+CPPFLAGS =
+TARGET= c1m2
 
+ifeq ($(PLATFORM),HOST)
+	CC=gcc
+	CFLAGS+= -DHOST
+
+else ifeq ($(PLATFORM),MSP432))
+	CC=arm-none-eabi-gcc
+	CFLAGS+= -mcpu=$(CPU) -m$(ARCH) -march=$(ARCV) --specs=$(SPECS)\
+		 -mfloat-abi=$(FLOAT) -mfpu=$(FPU) -DMSP432
+	LDFLAGS+= -T $(LINKER_FILE)
+endif
+
+OBJS= $(SOURCES:.c=.o)
+
+
+%.o : %.c
+	$(CC) -c $< $(CFLAGS) -o $@
+
+%.i: %.c
+       	gcc -E $< -o $@
+
+%.asm: %.c
+	$(CC) -S $< -o $@
+
+%.asm.final:$(TARGET).out
+	    objdump -d $< > $@
+
+
+.PHONY: build
+build: all
+
+
+.PHONY: all
+all: $(TARGET).out
+
+$(TARGET).out: $(OBJS)
+	$(CC) $(OBJS) $(CFLAGS) $(LDFLAGS) -o $@
+
+.PHONY: clean
+clean:
+	rm -f $(OBJS) $(TARGET).out $(TARGET).map *.i *.asm *.asm.final

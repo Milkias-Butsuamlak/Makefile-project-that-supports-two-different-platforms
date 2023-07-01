@@ -9,9 +9,20 @@
 #
 #*****************************************************************************
 
-# Add your Source files to this variable
-SOURCES =
+# Add your Source files and include paths based on the platform
+ifeq ($(PLATFORM),HOST)
+	SOURCES = main.c \
+		  memory.c 
+	INCLUDES=-I/home/ecee/week_2_assignment/include/common
+else ifeq ($(PLATFORM),MSP432)
+	SOURCES =main.c \
+		memory.c \
+		interrupts_msp432p401r_gcc.c \
+		startup_msp432p401r_gcc.c \
+	       	system_msp432p401r.c 
+	INCLUDES =-I/home/ecee/week_2_assignment/include/CMSIS \
+		  -I/home/ecee/week_2_assignment/include/common \
+		  -I/home/ecee/week_2_assignment/include/msp432
+endif  
 
-# Add your include paths to this variable
-INCLUDES = 
 
