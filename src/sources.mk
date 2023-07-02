@@ -14,7 +14,7 @@ ifeq ($(PLATFORM),HOST)
 	SOURCES = main.c \
 		  memory.c 
 	INCLUDES=-I/home/ecee/week_2_assignment/include/common
-else ifeq ($(PLATFORM),MSP432)
+else ifeq ($(PLATFORM),MSP432) 
 	SOURCES =main.c \
 		memory.c \
 		interrupts_msp432p401r_gcc.c \

@@ -27,7 +27,7 @@ include sources.mk
 PLATFORM ?= 
 
 # Architectures Specific Flags
-LINKER_FILE =msp432p401r.lds 
+LINKER_FILE =/home/ecee/week_2_assignment/msp432p401r.lds 
 CPU = cortex-m4
 ARCV=armv7e-m
 ARCH = thumb
@@ -39,7 +39,7 @@ SPECS = nosys.specs
 CC = 
 LD = 
 LDFLAGS = -Wl,-Map=$(TARGET).map
-CFLAGS = -Wall -Werror -g -Oo -std=c99
+CFLAGS = -Wall -Werror -g -O0 -std=c99
 CPPFLAGS =
 TARGET= c1m2
 
@@ -47,7 +47,7 @@ ifeq ($(PLATFORM),HOST)
 	CC=gcc
 	CFLAGS+= -DHOST
 
-else ifeq ($(PLATFORM),MSP432))
+else ifeq ($(PLATFORM),MSP432)
 	CC=arm-none-eabi-gcc
 	CFLAGS+= -mcpu=$(CPU) -m$(ARCH) -march=$(ARCV) --specs=$(SPECS)\
 		 -mfloat-abi=$(FLOAT) -mfpu=$(FPU) -DMSP432
@@ -58,16 +58,16 @@ OBJS= $(SOURCES:.c=.o)
 
 
 %.o : %.c
-	$(CC) -c $< $(CFLAGS) -o $@
+	$(CC) -c $< $(CFLAGS) $(INCLUDES) -o $@
 
 %.i: %.c
-       	gcc -E $< -o $@
+	gcc -E $< $(INCLUDES) -o $@
 
 %.asm: %.c
-	$(CC) -S $< -o $@
+	$(CC) -S $< $(INCLUDES) -o $@
 
 %.asm.final:$(TARGET).out
-	    objdump -d $< > $@
+	objdump -d $< > $@
 
 
 .PHONY: build
@@ -82,4 +82,4 @@ $(TARGET).out: $(OBJS)
 
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(TARGET).out $(TARGET).map *.i *.asm *.asm.final
+	rm -f $(OBJS) $(TARGET).out $(TARGET).map *.o *.i *.asm *.asm.final
